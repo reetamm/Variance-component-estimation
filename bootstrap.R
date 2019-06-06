@@ -1,5 +1,4 @@
 #Put this file and the data generator in the same folder and set it as working directory
-#test comment made using atom
 #setwd("D:/Google Drive/UMBC/2019 02 Spring/612/project")
 #setwd("C:/Users/reetam/Google Drive/2019 02 Spring/612/project")
 #install.packages("gridExtra")
