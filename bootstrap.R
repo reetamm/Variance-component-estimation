@@ -1,4 +1,5 @@
 #Put this file and the data generator in the same folder and set it as working directory
+#test comment made using atom
 #setwd("D:/Google Drive/UMBC/2019 02 Spring/612/project")
 #setwd("C:/Users/reetam/Google Drive/2019 02 Spring/612/project")
 #install.packages("gridExtra")
@@ -26,11 +27,11 @@ extractparam = function(data,type='nonparametric')
 {
   #insert error checks here to verify first variable is numeric, 2nd is group. drop any other variables
   names(data)=c("y","group")            # Change mdata2() nomenclature from grp to group
-  size=as.vector(table(data$group))     # Check if each group has at least 5 obs           
+  size=as.vector(table(data$group))     # Check if each group has at least 5 obs
   if(min(size)<5)
     print("Warning: at least one group has less than 5 observations")
-  
-  
+
+
   unique_groups = as.vector(unique(data$group)) #extract the group names
   n_i=NULL
   for(i in unique_groups)               # Run loop for each unique group. Vectorize within
@@ -38,47 +39,47 @@ extractparam = function(data,type='nonparametric')
     n_i[i]=sum(data$group==i)
   }
   n_i = as.vector(n_i)
-  
+
   if(type=='nonparametric' | type== 'np' | type == 'n')
-    
+
   {
     param_np = list(unique_groups = unique_groups,n_i = n_i)
     return(param_np)
   }
-  
+
   if(type == 'parametric' | type == 'p')
   {
-  fit=lmer(y~ (1 | group), data=data)   
+  fit=lmer(y~ (1 | group), data=data)
   mu_hat = as.data.frame(fixef(fit))[1,1] # Common mean
-  v = as.data.frame(VarCorr(fit))       
+  v = as.data.frame(VarCorr(fit))
   sigmat2_hat = v[1,4]                    # Group Variance - change 4 to 5 to get SD instead
   sigma2_hat = v[2,4]                     # Noise Variance - change 4 to 5 to get SD instead
   n_i_sq=sum(n_i^2)
   param_p = c(mu_hat,sigma2_hat,sigmat2_hat,n_i_sq)
   return(param_p)
   }
-  
+
   if(type == 'blup')
   {
-    
+
     fitted=lmer(y~ (1 | group), data=data)
     mu_hat=as.data.frame(fixef(fitted))[1,1]
     tau_hat = as.vector(ranef(fitted)$group[,1])
     resid = as.vector(resid(fitted))
-    
+
     param_blup = list(unique_groups=unique_groups,n_i=n_i,mu_hat=mu_hat,tau_hat=tau_hat,resid=resid)
-    return(param_blup)          
+    return(param_blup)
   }
-  
+
   if(type == 'blue')
   {
     fitted = lm(y~group -1, data = data)
     mu_hat = mean(data$y)
     tau_hat = as.vector(fitted$coefficients - mu_hat)
     resid = as.vector(fitted$residuals)
-    
+
     param_blue = list(unique_groups=unique_groups,n_i=n_i,mu_hat=mu_hat,tau_hat=tau_hat,resid=resid)
-    return(param_blue)  
+    return(param_blue)
   }
 }
 
@@ -96,7 +97,7 @@ npbootsample = function(data)           # input dataframe with 1st variable nume
   for(i in 1:length(n_i))               # Run loop for each unique group. Vectorize within
   {
     temp = sample(data$y[data$grp==unique_groups[i]],n_i[i],replace = T) # Resample from i-th group with replacement
-    ynew = c(ynew,temp)                   # Append group i's resample 
+    ynew = c(ynew,temp)                   # Append group i's resample
     groupnew = c(groupnew,rep(i,n_i[i]))       # n_i observations of group i
   }
   newdata = data.frame(y=ynew,group=groupnew)     # Set data frame
@@ -121,10 +122,10 @@ pbootsample = function(data,k,n,b,random=F) # k, n, b inherited from the top
     constant = (n*k-n_i_sq/(n*k))/(k-1)
     sigmat2_star = (sigma2_hat+constant*sigmat2_hat)*rchisq(1,df2)/(df2)
   }
-  
+
   data_star = mdata2(k,n,b,sig2=sigma2_star, sigt2=sigmat2_star,mu=mu_hat,mut=numeric(k))  # m inherited from top
   names(data_star) = c("y","group")     # Rename grp to group
-  return(data_star)  
+  return(data_star)
 }
 
 # Function 4. blupbootsample()
@@ -156,7 +157,7 @@ blupbootsample = function(data, effect.type = 'random')
 bootrem = function(data = data, M=1000,type='n',verbose=F,effect.type='random')       # M is number of bootstrap samples, removed seed and added data as function input
 {
   mu=numeric(M);sigma2=numeric(M);sigmat2=numeric(M)            # Initialize with blanks
-  
+
   for(i in 1:M)
   {
     if(verbose==T)
@@ -173,9 +174,9 @@ bootrem = function(data = data, M=1000,type='n',verbose=F,effect.type='random') 
     {
       sample = blupbootsample(data,effect.type)  #data not needed. extract=F. Needs list of params from initial run
     }
-    
+
     fit=lmer(y~ (1 | group),data=sample) # Run the ANOVA
-    mu_1 = as.data.frame(fixef(fit))[1,1] 
+    mu_1 = as.data.frame(fixef(fit))[1,1]
     v = as.data.frame(VarCorr(fit))
     sigmat2_1 = v[1,4]
     sigma2_1 = v[2,4]
@@ -183,7 +184,7 @@ bootrem = function(data = data, M=1000,type='n',verbose=F,effect.type='random') 
     sigmat2[i] = sigmat2_1
     sigma2[i] = sigma2_1
   }
-  estimates = data.frame(mu=mu,sigma2=sigma2,sigmat2=sigmat2) 
+  estimates = data.frame(mu=mu,sigma2=sigma2,sigmat2=sigmat2)
   return(estimates)                     # Dataframe with 3 columns of M estimates
 }
 
@@ -193,7 +194,7 @@ bootrem = function(data = data, M=1000,type='n',verbose=F,effect.type='random') 
 # from extractparam()) and alpha (default 5%)
 # two.sided gives 2 sided intervals for variance components
 # sd=T gives square root of variance
-bootconf = function(estimates, alpha=.05, two.sided=F, sd = F,plots=T) 
+bootconf = function(estimates, alpha=.05, two.sided=F, sd = F,plots=T)
 {
   mu_L = quantile(estimates$mu,alpha/2)
   mu_U = quantile(estimates$mu, 1 - alpha/2)
@@ -256,12 +257,12 @@ bootperf = function(k,b,var,M,max,two.sided=F,sd=F,alpha=0.05,run.parametric=T,r
     fit=lmer(y~ (1 | grp), data=data)
     if(isSingular(fit)==F)
     {
-    
+
     if(run.nonparametric==T)
     {
       estimates1=bootrem(data,M=M,type = 'n',verbose = F)
       CIa = bootconf(estimates1,alpha,two.sided,sd, plots = F)
-      
+
       if(CIa[2,1]<=0.5^pow)
       {
         nonparacheck[i] = T
@@ -275,12 +276,12 @@ bootperf = function(k,b,var,M,max,two.sided=F,sd=F,alpha=0.05,run.parametric=T,r
       if(verbose == T)
         print(i)
     }
-    
+
     if(run.parametric==T)
     {
       estimates2=bootrem(data=data,M=M,type = 'p',verbose = F)
       CIb = bootconf(estimates2,alpha,two.sided,sd, plots = F)
-      
+
       if(CIb[2,1]<=0.5^pow)
       {
         paracheck[i] = T
@@ -294,12 +295,12 @@ bootperf = function(k,b,var,M,max,two.sided=F,sd=F,alpha=0.05,run.parametric=T,r
       if(verbose == T)
       print(i)
     }
-    
+
     if(run.blup==T)
     {
       estimates3=bootrem(data=data,M=M,type = 'b',verbose = F)
       CIc = bootconf(estimates3,alpha,two.sided,sd, plots = F)
-      
+
       if(CIc[2,1]<=0.5^pow)
       {
         blupcheck[i] = T
@@ -330,7 +331,7 @@ bootperf = function(k,b,var,M,max,two.sided=F,sd=F,alpha=0.05,run.parametric=T,r
     nonparataucoverage = NA
     nonparataulength = NA
   }
-  
+
   if(run.parametric==T)
   {
     paracoverage = sum(paracheck)
@@ -345,7 +346,7 @@ bootperf = function(k,b,var,M,max,two.sided=F,sd=F,alpha=0.05,run.parametric=T,r
     parataucoverage = NA
     parataulength = NA
   }
-  
+
   if(run.blup==T)
   {
     blupcoverage = sum(blupcheck)
@@ -362,12 +363,12 @@ bootperf = function(k,b,var,M,max,two.sided=F,sd=F,alpha=0.05,run.parametric=T,r
   }
   out = matrix(c(nonparacoverage,nonparalength,nonparataucoverage,nonparataulength,paracoverage,paralength,parataucoverage,parataulength,blupcoverage,bluplength,bluptaucoverage,bluptaulength),ncol=4,byrow = T)
   out=as.data.frame(out)
-  
+
   if(effect.type == 'random' | effect.type == 'r')
     rownames(out) = c("nonparam","param","BLUP")
   if(effect.type == 'fixed' | effect.type == 'f')
     rownames(out) = c("nonparam","param","BLUP(BLUE)")
-  
+
   if(sd==T)
     names(out) = c("sigma coverage","sigma length","sigmatau coverage","sigmatau length")
   else
@@ -429,8 +430,7 @@ write.csv(rbind(out1,out2[3,]),outname)
 #estimates3=bootrem(data=data,M=1000,type = 'b',verbose = T)
 
 # even if we set two.sided=F, the table header does not change - working on it.
-# sd = F will output variance. 
+# sd = F will output variance.
 #bootconf(estimates1,alpha = .05,two.sided = F,sd=T, plots = T)
 #bootconf(estimates2,alpha = .05,two.sided = F,sd=T, plots = T)
 #bootconf(estimates3,alpha = .05,two.sided = F,sd=T, plots = T)
-
