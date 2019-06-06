@@ -412,8 +412,8 @@ for(b in b_i)
 
 #confint(fit)
 
-out1=bootperf(k,b,sigmat2,M=10, max=20, two.sided = F, sd=F, alpha = 0.05, run.parametric = T, run.nonparametric = T, run.blup = T,verbose = F)
-out2=bootperf(k,b,sigmat2,M=10, max=20, two.sided = F, sd=F, alpha = 0.05, run.parametric = F, run.nonparametric = F, run.blup = T,verbose = F, effect.type = 'fixed')
+out1=bootperf(k,b,sigmat2,M=1000, max=200, two.sided = F, sd=F, alpha = 0.05, run.parametric = T, run.nonparametric = T, run.blup = T,verbose = F)
+out2=bootperf(k,b,sigmat2,M=1000, max=200, two.sided = F, sd=F, alpha = 0.05, run.parametric = F, run.nonparametric = F, run.blup = T,verbose = F, effect.type = 'fixed')
 outname = paste0("k",k,"b",b,'tausq',sigmat2,'.csv')
 write.csv(rbind(out1,out2[3,]),outname)
 }
