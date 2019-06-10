@@ -49,5 +49,30 @@ data$grp = as.factor(data$grp)
 
 return(data)
 }
-#data=mdata2()
-#names(data)
+#for mdata3, n_i is a vector containing the number of samples per group, k is number of groups
+#by defaut, mdata3 generates balanced data with 10 groups and 10 samples per group
+mdata3<-function(n_i=NULL, k=10,n=10, b=1, m=5, sig2=0.5,sigt2=1,mu=10,mut=numeric(k)){
+    if(sum(is.na(n_i))==0 & sum(n_i>0)==length(n_i) & length(n_i)>0)
+    {
+      k<-length(n_i); #extracts number of groups
+      muv<-rnorm(k,mean=0,sd=sqrt(sigt2)); #generates vector of means to be used for each group
+      y<-0;
+      grp<-0;
+      out<-cbind(y,grp); #container of data
+      for(i in 1:k){
+        yd<-mu+muv[i]+rnorm(n_i[i],mean=0,sd=sqrt(sig2)); #data for group i
+        out<-rbind(out,cbind(yd,numeric(n_i[i])+i)); #index i
+        }
+      out<-out[-1,]; #removes first row
+      out<-as.data.frame(out); #turns matrix to dataframe
+      out$grp = as.factor(out$grp) #coerces grp to be treated as factor
+  }
+else
+  {
+    out = mdata2(k=k,n=n,b=b,sig2=sig2,sigt2=sigt2,m=5,mu=10,mut=numeric(k))
+  }
+#plotmeans(y ~ grp, data = out); #plot
+return(out);
+}
+
+mdata3(n_i=c(NA))
