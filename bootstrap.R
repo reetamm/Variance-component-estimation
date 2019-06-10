@@ -269,15 +269,21 @@ bootperf <- function(k, b, v, M, max, two.sided = F, sd = F, alpha = 0.05, run.p
         estimates1 <- bootrem(data, M = M, type = 'n', verbose = F)
         CIa <- bootconf(estimates1, alpha, two.sided, sd, plots = F)
 
-        if (CIa[2,1] <= 0.5^pow)
+        if (CIa[2,1] <= 0.5^pow & CIa[2,2] >= 0.5^pow)
         {
           nonparacheck[i] <- T
-          nonpara[i] <- CIa[2,1]
+          if (two.sided == F)
+            nonpara[i] <- CIa[2,1]
+          else
+            nonpara[i] <- CIa[2,2] - CIa[2,1]
         }
-        if (CIa[3,1] <= v^pow)
+        if (CIa[3,1] <= v^pow & CIa[3,2] >= v^pow)
         {
           nonparataucheck[i] <- T
-          nonparatau[i] <- CIa[3,1]
+          if (two.sided == F)
+            nonparatau[i] <- CIa[3,1]
+          else
+            nonparatau[i] <- CIa[3,2] - CIa[3,1]
         }
         if (verbose == T)
           print(i)
@@ -288,15 +294,21 @@ bootperf <- function(k, b, v, M, max, two.sided = F, sd = F, alpha = 0.05, run.p
         estimates2 <- bootrem(data = data, M = M, type = 'p',verbose = F)
         CIb <- bootconf(estimates2, alpha, two.sided, sd, plots = F)
 
-        if (CIb[2,1] <= 0.5^pow)
+        if (CIb[2,1] <= 0.5^pow & CIb[2,2] >= 0.5^pow)
         {
           paracheck[i] <- T
-          para[i] <- CIb[2,1]
+          if (two.sided == F)
+            para[i] <- CIb[2,1]
+          else
+            para[i] <- CIb[2,2] - CIb[2,1]
         }
-        if (CIb[3,1] <= v^pow)
+        if (CIb[3,1] <= v^pow & CIb[3,2] >= v^pow)
         {
           parataucheck[i] <- T
-          paratau[i] <- CIb[3,1]
+          if (two.sided == F)
+            paratau[i] <- CIb[3,1]
+          else
+            paratau[i] <- CIb[3,2] - CIb[3,1]
         }
         if (verbose == T)
           print(i)
@@ -307,15 +319,21 @@ bootperf <- function(k, b, v, M, max, two.sided = F, sd = F, alpha = 0.05, run.p
         estimates3 <- bootrem(data = data, M = M, type = 'b',verbose = F)
         CIc <- bootconf(estimates3, alpha, two.sided, sd, plots = F)
 
-        if (CIc[2,1] <= 0.5^pow)
+        if (CIc[2,1] <= 0.5^pow & CIc[2,2] >= 0.5^pow)
         {
           blupcheck[i] <- T
-          blup[i] <- CIc[2,1]
+          if (two.sided == F)
+            blup[i] <- CIc[2,1]
+          else
+            blup[i] <- CIc[2,2] - CIc[2,1]
         }
-        if (CIc[3,1] <= v^pow)
+        if (CIc[3,1] <= v^pow & CIc[3,2] >= v^pow)
         {
           bluptaucheck[i] <- T
-          bluptau[i] <- CIc[3,1]
+          if (two.sided == F)
+            bluptau[i] <- CIc[3,1]
+          else
+            bluptau[i] <- CIc[3,2] - CIc[3,1]
         }
         if (verbose == T)
           print(i)
