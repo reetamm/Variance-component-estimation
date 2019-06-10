@@ -11,77 +11,13 @@ source("data_generator.R") #imports the contents of the data generator
 ###########################################################
 ######## Bootstrap Functions ##############################
 ###########################################################
-####### 1. extractparam() is a paramter extraction function
+####### 1. extractparam() is a paramter extraction function - moved to data_generator.R
 ####### 2. npbootsample() generates single nonparametric bootstrap sample
 ####### 3. pbootsample() generates sinlge parametric bootstrap sample
 ####### 4. blupbootsample() does 2 runs; run 1 extracts parameters as list. run 2 uses that list to generate blup sample.
 ####### 5. bootrem() generates M bootstrap estimates of mu, sigma2, sigmat2
 ####### 6. bootconf() gets the confidence intervals based on bootrem()
 ####### 7. bootperf() is a wrapper for bootconf and gives coverage and performance
-
-# Function 1. extractparam()
-# Extract the paramters for the model. Uses Seed = 1
-# Returns a vector of length 3 with mean, sigma2 and sigmat2
-extractparam <- function(data, type = 'nonparametric')
-  {
-  #insert error checks here to verify first variable is numeric, 2nd is group. drop any other variables
-  names(data) <- c("y", "group")            # Change mdata2() nomenclature from grp to group
-  size <- as.vector(table(data$group))     # Check if each group has at least 5 obs
-  if (min(size) < 5)
-    print("Warning: at least one group has less than 5 observations")
-
-
-  unique_groups <- as.vector(unique(data$group)) #extract the group names
-  n_i <- NULL
-  for (i in unique_groups)               # Run loop for each unique group. Vectorize within
-  {
-    n_i[i] <- sum(data$group == i)
-  }
-  n_i <- as.vector(n_i)
-
-  if (type == 'nonparametric' | type == 'np' | type == 'n')
-
-  {
-    param_np <- list(unique_groups = unique_groups, n_i = n_i)
-    return(param_np)
-  }
-
-  if (type == 'parametric' | type == 'p')
-  {
-  fit <- lmer(y ~ (1 | group), data = data)
-  mu_hat <- as.data.frame(fixef(fit))[1,1] # Common mean
-  v <- as.data.frame(VarCorr(fit))
-  sigmat2_hat <- v[1,4]                    # Group Variance - change 4 to 5 to get SD instead
-  sigma2_hat <- v[2,4]                     # Noise Variance - change 4 to 5 to get SD instead
-  n_i_sq <- sum(n_i^2)
-  param_p <- c(mu_hat,sigma2_hat,sigmat2_hat,n_i_sq)
-  return(param_p)
-  }
-
-  if (type == 'blup')
-  {
-
-    fitted <- lmer(y~ (1 | group), data = data)
-    mu_hat <- as.data.frame(fixef(fitted))[1,1]
-    tau_hat <- as.vector(ranef(fitted)$group[ ,1])
-    resid <- as.vector(resid(fitted))
-
-    param_blup <- list(unique_groups = unique_groups, n_i = n_i, mu_hat = mu_hat, tau_hat = tau_hat, resid = resid)
-    return(param_blup)
-  }
-
-  if (type == 'blue')
-  {
-    fitted <- lm(y ~ group - 1, data = data)
-    mu_hat <- mean(data$y)
-    tau_hat <- as.vector(fitted$coefficients - mu_hat)
-    resid <- as.vector(fitted$residuals)
-
-    param_blue <- list(unique_groups = unique_groups, n_i = n_i, mu_hat = mu_hat, tau_hat = tau_hat, resid = resid)
-    return(param_blue)
-  }
-}
-
 
 # Function 2. npbootsample()
 # non parametric bootstrap sample generation
